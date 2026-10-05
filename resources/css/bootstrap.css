@@ -1,0 +1,7 @@
+/*
+ * Bootstrap for left-to-right interfaces. It sits in its own cascade layer, so
+ * every rule in app.css wins over it whatever the selector: Bootstrap supplies
+ * components and utilities, app.css keeps the last word on how the site looks.
+ * Its colours come from the theme variables (see "Bootstrap" in app.css).
+ */
+@import 'bootstrap/dist/css/bootstrap.min.css' layer(bootstrap);

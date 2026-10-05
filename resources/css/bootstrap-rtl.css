@@ -1,0 +1,2 @@
+/* Bootstrap's mirrored build, for right-to-left interfaces. See bootstrap.css. */
+@import 'bootstrap/dist/css/bootstrap.rtl.min.css' layer(bootstrap);

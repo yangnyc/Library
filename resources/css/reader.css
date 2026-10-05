@@ -1,0 +1,121 @@
+/* Reader chrome. Book content is styled inside its own frame by the reader script. */
+
+@import '@fontsource/noto-serif/latin-400.css';
+@import '@fontsource/noto-serif/latin-400-italic.css';
+@import '@fontsource/noto-serif/latin-700.css';
+@import '@fontsource/noto-serif/cyrillic-400.css';
+@import '@fontsource/noto-serif/cyrillic-400-italic.css';
+@import '@fontsource/noto-serif/cyrillic-700.css';
+@import '@fontsource/noto-serif-hebrew/hebrew-400.css';
+@import '@fontsource/noto-serif-hebrew/hebrew-700.css';
+
+body.reader {
+    --r-bg: #ffffff; --r-text: #1a1a1a; --r-chrome: #faf7f0; --r-border: #e2dccf; --r-link: #7a1f33; --r-focus: #7a1f33;
+    block-size: 100vh; block-size: 100dvh; min-block-size: 0; overflow: hidden;
+    display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+    background: var(--r-bg); color: var(--r-text);
+    color-scheme: light;
+}
+body.reader[data-theme='sepia'] { --r-bg: #f6eedb; --r-text: #3a2f1e; --r-chrome: #ebe0c6; --r-border: #c2b28c; --r-link: #6b3f10; }
+body.reader[data-theme='dark'] { --r-bg: #0a0a0b; --r-text: #ece6d8; --r-chrome: #121213; --r-border: #2b2925; --r-link: #d9b65c; --r-focus: #f2d680; color-scheme: dark; }
+body.reader[data-theme='contrast'] { --r-bg: #000000; --r-text: #ffffff; --r-chrome: #000000; --r-border: #ffffff; --r-link: #ffff00; --r-focus: #00ffff; color-scheme: dark; }
+
+body.reader :focus-visible { outline-color: var(--r-focus); }
+body.reader a { color: var(--r-link); }
+
+.rbar, .rfoot, .pdfbar { background: var(--r-chrome); color: var(--r-text); border-color: var(--r-border); }
+.rbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; padding: 0.65rem 1rem; border-block-end: 1px solid var(--r-border); grid-row: 1; }
+.rbar__back { display: inline-flex; align-items: center; justify-content: center; inline-size: 2.75rem; block-size: 2.75rem; border-radius: 6px; }
+.rbar__title { font-size: 1rem; margin: 0; flex: 1 1 8rem; min-inline-size: 4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rbar__tools { display: flex; flex-wrap: wrap; gap: 0.3rem; max-inline-size: 100%; }
+
+.rbtn {
+    font: inherit; font-size: 0.9rem; min-block-size: 2.75rem; min-inline-size: 2.75rem; padding: 0.3rem 0.7rem; white-space: nowrap;
+    background: var(--r-bg); color: var(--r-text); border: 1px solid var(--r-border); border-radius: 6px; cursor: pointer;
+}
+.rbtn:hover { border-color: var(--r-link); color: var(--r-link); }
+.rbtn[aria-pressed='true'] { outline: 2px solid var(--r-link); outline-offset: -4px; }
+.rbtn:disabled { opacity: 0.5; cursor: default; }
+
+/* Direction-neutral arrows drawn with borders; mirrored for RTL interfaces. */
+.icon { display: inline-block; inline-size: 0.7rem; block-size: 0.7rem; border-block-start: 2px solid currentColor; border-inline-start: 2px solid currentColor; }
+.icon--back, .icon--prev { transform: rotate(-45deg); }
+.icon--next { transform: rotate(135deg); }
+[dir='rtl'] .icon--back, [dir='rtl'] .icon--prev { transform: rotate(45deg); }
+[dir='rtl'] .icon--next { transform: rotate(-135deg); }
+
+.rnotice { grid-row: 2; margin: 0; padding: 0.4rem 0.75rem; background: var(--r-chrome); border-block-end: 1px solid var(--r-border); font-size: 0.95rem; }
+.rnotice--warn { background: #fdf1cf; color: #1d1d1b; }
+.pdfbar { grid-row: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; padding: 0.3rem 0.5rem; border-block-end: 1px solid var(--r-border); }
+.pdfbar label { margin: 0; font-weight: 400; }
+.pdfbar input { inline-size: 5rem; min-block-size: 2.75rem; }
+
+.rstage { grid-row: 4; display: flex; min-block-size: 0; min-inline-size: 0; position: relative; }
+.rbook { flex: 1 1 0; min-inline-size: 0; min-block-size: 0; position: relative; display: flex; justify-content: center; overflow: hidden; }
+.rbook:focus { outline: none; }
+.rviewer { inline-size: 100%; block-size: 100%; max-inline-size: var(--reader-width, 100%); padding-inline: var(--reader-margin, 0); }
+.reader--pdf .rviewer { overflow: auto; text-align: center; padding: 0.75rem; max-inline-size: none; background: var(--r-chrome); }
+
+/* The page-turn buttons follow reading direction of the interface; the
+   script decides which one means "forward" for the book. */
+.rnav {
+    flex: 0 0 2.75rem; background: transparent; color: var(--r-text); border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.rnav:hover, .rnav:focus-visible { background: var(--r-chrome); }
+@media (max-width: 36rem) { .rnav { flex-basis: 2rem; } }
+
+.rloading, .rerror { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; padding: 1.5rem; text-align: center; background: var(--r-bg); z-index: 2; }
+.rloading[hidden], .rerror[hidden] { display: none; }
+
+.rfoot { grid-row: 5; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.2rem 1rem; padding: 0.55rem 1rem; font-size: 0.8rem; border-block-start: 1px solid var(--r-border); }
+
+body.reader[data-chrome='hidden'] [data-chrome] { display: none; }
+
+.seltools { position: fixed; z-index: 5; display: flex; gap: 0.3rem; padding: 0.3rem; background: var(--r-chrome); border: 1px solid var(--r-border); border-radius: 8px; box-shadow: 0 2px 10px rgb(0 0 0 / 0.3); }
+.seltools[hidden] { display: none; }
+
+/* Panels are native <dialog> elements: focus is trapped and Esc closes them. */
+.panel {
+    inline-size: min(26rem, 100vw); max-inline-size: 100vw; block-size: 100dvh; max-block-size: 100dvh;
+    margin: 0; margin-inline-start: auto; padding: 1.5rem; overflow: auto;
+    background: var(--r-bg); color: var(--r-text); border: 0; border-inline-start: 1px solid var(--r-border);
+}
+.panel--small { block-size: auto; max-block-size: 80dvh; margin: auto; inline-size: min(30rem, calc(100vw - 2rem)); border: 1px solid var(--r-border); border-radius: 8px; }
+.panel::backdrop { background: rgb(0 0 0 / 0.45); }
+.panel__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: sticky; inset-block-start: -1.5rem; background: var(--r-bg); padding-block: 0.5rem 1rem; border-block-end: 1px solid var(--r-border); margin-block-end: 1rem; }
+.panel h2 { font-size: 1.15rem; margin-block: 0.5rem; }
+.panel h3 { font-size: 1rem; }
+.panel__form { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-block: 0.5rem; }
+.panel__form input { flex: 1 1 10rem; }
+.panel input, .panel textarea, .panel select { background: var(--r-bg); color: var(--r-text); border-color: var(--r-border); }
+.panel label { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; min-block-size: 2.5rem; }
+.panel .field label { display: flex; justify-content: space-between; font-weight: 700; }
+.panel input[type='radio'], .panel input[type='checkbox'] { inline-size: 1.2rem; block-size: 1.2rem; }
+.panel input[type='range'] { inline-size: 100%; min-block-size: 2.5rem; }
+.panel fieldset { border-color: var(--r-border); }
+.panel .button { background: var(--r-text); color: var(--r-bg); border-color: var(--r-text); }
+.panel .button--ghost { background: transparent; color: var(--r-text); }
+.panel blockquote { margin: 0 0 0.75rem; padding-inline-start: 0.75rem; border-inline-start: 3px solid var(--r-border); }
+.panel progress { inline-size: 100%; }
+
+.toc, .results, .marks { list-style: none; margin: 0; padding: 0; }
+.toc ol { list-style: none; margin: 0; padding-inline-start: 1rem; }
+.toc a, .results button, .marks .mark__go {
+    display: block; inline-size: 100%; text-align: start; padding: 0.6rem 0.4rem; min-block-size: 2.75rem;
+    background: none; border: 0; border-block-end: 1px solid var(--r-border); color: var(--r-text); font: inherit; text-decoration: none; cursor: pointer;
+}
+.toc a[aria-current] { font-weight: 700; }
+.results mark { background: #ffe066; color: #000; }
+.marks li { border-block-end: 1px solid var(--r-border); padding-block: 0.4rem; }
+.marks .mark__go { border: 0; padding-inline: 0; }
+.marks .mark__note { white-space: pre-wrap; margin: 0.2rem 0; }
+.marks .mark__tools { display: flex; gap: 0.4rem; }
+
+.pdf-page { position: relative; display: inline-block; margin: 0 auto; background: #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.35); line-height: 1; }
+.pdf-page canvas { display: block; }
+/* Transparent, selectable text over the page image (PDF.js text layer). */
+.pdf-text { position: absolute; inset: 0; overflow: hidden; opacity: 1; line-height: 1; text-align: initial; forced-color-adjust: none; }
+.pdf-text span, .pdf-text br { position: absolute; color: transparent; white-space: pre; cursor: text; transform-origin: 0 0; }
+.pdf-text ::selection { background: rgb(0 90 255 / 0.3); }
+.pdf-text .hit { background: rgb(255 210 0 / 0.45); }

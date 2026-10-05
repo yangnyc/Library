@@ -1,0 +1,597 @@
+Act as the lead architect and full-stack engineer for a production-quality
+multilingual digital reading library.
+
+Build the application, not just a mockup or architecture proposal.
+Work incrementally, verify each milestone, and document implementation
+decisions and remaining limitations.
+
+PROJECT GOAL
+
+Create a public website where visitors can:
+- Discover books and browse curated collections.
+- Choose among available languages, translations, and editions.
+- Read supported books comfortably in a browser.
+- Download available, authorized book files without creating an account.
+- Use phones, tablets, laptops, and desktop computers.
+- Download EPUB files for use with external reading apps and Send to Kindle.
+
+Start with English, Russian, and Hebrew.
+Make additional languages configurable without schema changes.
+
+Use “Jewish Library” as a replaceable working name.
+Keep branding, domain names, and contact details configurable.
+
+1. HOSTING CONSTRAINTS
+
+Production environment:
+- GoDaddy Linux shared hosting.
+- cPanel.
+- Apache.
+- MySQL or MariaDB.
+- PHP 8.3 is the stated baseline; verify the actual version.
+- Python may be available through Python Selector.
+- SSH, Composer, and command-line access must be verified.
+- Cron availability and permitted frequency must be verified.
+
+Do not require:
+- Root access or Docker in production.
+- A persistent Node.js or Python application server.
+- Redis, Elasticsearch, Meilisearch, or PostgreSQL.
+- WebSockets or continuously running queue workers.
+- Server-side rendering that requires a Node.js process.
+- Server-installed ebook conversion or OCR binaries.
+
+Node.js is acceptable for local or CI asset builds.
+Python and external conversion tools are optional preparation utilities,
+not production runtime dependencies.
+
+Before committing to dependencies:
+- Inspect the existing repository and preserve unrelated work.
+- Check supported framework and package versions using official sources.
+- Verify PHP extensions, database version and collation support.
+- Check upload, memory, execution-time, disk, inode, and bandwidth limits.
+- Check document-root configuration, cron, SMTP, HTTPS, and storage permissions.
+- Record anything that cannot be verified without hosting access.
+- Do not invent successful hosting checks.
+
+2. DEFAULT ARCHITECTURE
+
+Use:
+- A currently supported Laravel release compatible with PHP 8.3.
+- Laravel Blade for server-rendered public and administrative pages.
+- Lightweight JavaScript for interactions.
+- TypeScript modules for the reader and offline functionality where useful.
+- A locally compiled CSS framework or maintainable custom CSS.
+- Vite for build-time assets only.
+- MySQL/MariaDB with utf8mb4.
+- File or database caching and database-backed jobs.
+- Local filesystem storage behind a storage abstraction.
+
+Use stable, maintained dependencies with compatible licenses.
+Commit dependency lockfiles.
+
+Evaluate EPUB.js for browser EPUB rendering.
+Use PDF.js for PDF rendering.
+Before choosing the EPUB engine, demonstrate English, Russian, Hebrew,
+mixed-direction text, navigation, and saved-position restoration.
+Document any reader-engine limitations rather than promising full EPUB support.
+
+Use a modular monolith, with clear boundaries between:
+- Catalog and metadata.
+- Languages and localization.
+- Imports and publication.
+- Reader and reading state.
+- Downloads and file access.
+- Accounts and administration.
+
+Do not create unnecessary microservices.
+
+3. DATA MODEL
+
+Separate these concepts:
+
+Work:
+- The underlying intellectual work.
+- Original title and original language.
+- Authors, subjects, series, and relationships to other works.
+
+Edition:
+- A particular translation or published version of a work.
+- Language expressed with a BCP 47 language tag.
+- Title, subtitle, description, translators, publisher, publication date.
+- Optional ISBN, edition statement, cover, source, and attribution.
+- Text direction and reading-order metadata.
+- Publication status and availability.
+
+EditionFile:
+- One file belonging to an edition.
+- Format, MIME type, byte size, checksum, storage location, version.
+- Import status and validation results.
+- Separate reading and downloading permissions.
+- Rights/license information and relevant restrictions.
+
+Support multiple editions in the same language.
+Do not enforce one edition per language per work.
+
+Include related entities as needed:
+- Contributors and contributor roles.
+- Localized catalog metadata.
+- Categories, tags, series, and curated collections.
+- Users and administrative roles.
+- Favorites, reading lists, bookmarks, annotations, and reading progress.
+- Import jobs and audit events.
+
+Do not store ebook binaries in the relational database.
+
+Keep reading locations tied to the exact edition and content version.
+Store EPUB locators such as CFI where supported, PDF page locations,
+and stable chapter/anchor locations for prepared HTML content.
+
+Treat file replacement as versioning.
+Do not silently reuse invalid annotations after content changes.
+
+4. LANGUAGES AND HEBREW
+
+Keep these independent:
+- Website interface language.
+- Catalog metadata language.
+- Book edition language.
+- Reading direction.
+
+A visitor must be able to use the English interface while reading Hebrew.
+
+Implement:
+- English, Russian, and Hebrew UI translation files.
+- Explicit locale routes, such as /en/, /ru/, and /he/.
+- A remembered language preference and sensible fallback.
+- Language names written in their own language.
+- Correct lang and dir attributes.
+- CSS logical properties.
+- Bidirectional isolation for mixed-language titles, names, and identifiers.
+- Fonts with good Latin, Cyrillic, and Hebrew coverage.
+- Correct display of Hebrew vowel marks.
+- Reader navigation that respects the publication's declared reading order.
+
+Do not assume that right-aligned text alone provides RTL support.
+
+Preserve original text.
+If useful for Hebrew search, maintain a separate normalized search value
+without vowel/cantillation marks; do not alter the displayed source text.
+
+Edition switching must show available translations clearly.
+Do not claim that the same percentage or page number represents the same
+passage across translations.
+
+Offer parallel reading only as an optional later feature.
+Synchronized comparison requires explicit chapter or passage mappings.
+Without mappings, use independent navigation and explain the limitation.
+
+5. PUBLIC WEBSITE
+
+Implement:
+- Home page with featured collections and recently added books.
+- Searchable catalog with grid/list views.
+- Work pages grouping available editions.
+- Edition pages with Read and Download actions.
+- Author and translator pages.
+- Collection and category pages.
+- Help pages for reading, downloads, and Kindle.
+- About, contact, accessibility, privacy, and rights/reporting pages.
+
+Each edition page should show:
+- Cover, title, authors, translators, language, and description.
+- Publisher/year and source where known.
+- Available formats and file sizes.
+- Rights/license attribution.
+- Available reading modes.
+- Other editions and translations.
+- Clear reasons when a format or action is unavailable.
+
+Search:
+- Search titles, contributors, descriptions, tags, and identifiers.
+- Filter by language, author, translator, category, collection, and format.
+- Support sorting and paginated results.
+- Preserve filters in shareable URLs.
+- Provide useful empty and error states.
+
+Use database-native indexes where suitable.
+Test multilingual and short-word behavior.
+Provide a bounded fallback for queries not handled by full-text indexing.
+Do not require an external search server for launch.
+
+Global full-book search is optional later work.
+Keep it separate from catalog search and in-book search.
+
+6. BROWSER READER
+
+EPUB reading:
+- Continuous vertical scrolling.
+- Paginated reading.
+- Single-page and optional two-page layouts.
+- Responsive layout switching.
+- Table of contents and chapter navigation.
+- Search within the book.
+- Font family and size controls.
+- Line spacing, margins, and reading-width controls.
+- Light, sepia, dark, and high-contrast themes.
+- Respect publisher styling where possible, with accessible user overrides.
+- Fullscreen/distraction-free reading when supported.
+- Footnotes and internal links.
+- Reading progress and position restoration.
+- Bookmarks, highlights, and private notes.
+- Touch, keyboard, and visible navigation controls.
+- Reduced-motion support.
+
+Reflowable text positions must survive font and viewport changes.
+Avoid treating dynamically generated screen pages as permanent page numbers.
+Only show print-page references when source metadata provides them.
+
+PDF reading:
+- Page navigation, zoom, fit-to-width, and fullscreen.
+- Text search and selection where a text layer exists.
+- Clear handling of scanned PDFs without searchable text.
+- Accessible download/open-in-external-viewer fallback.
+
+Do not promise font resizing or EPUB-like reflow for fixed-layout PDFs.
+Do not describe color inversion of PDF pages as universally suitable.
+
+For fixed-layout or unsupported EPUB features:
+- Detect the condition where possible.
+- Preserve a usable fallback.
+- Explain limitations.
+- Provide the approved download option.
+
+Load chapters/pages incrementally where practical.
+Do not render an entire large book into the DOM at once.
+Debounce reading-progress writes.
+
+7. ACCOUNTS AND READING STATE
+
+Public catalog access, reading, and authorized downloads must not require login.
+
+Guest readers:
+- Save settings and progress locally.
+- Save bookmarks and notes locally where supported.
+- Explain that local data may be cleared by the browser.
+
+Optional accounts:
+- Synchronize reading progress, bookmarks, notes, and preferences.
+- Provide favorites and reading lists.
+- Support password reset and email verification.
+- Provide account deletion and personal-data export.
+
+If email is not configured, disable dependent flows clearly.
+Do not ship password recovery that falsely reports successful delivery.
+
+Use established authentication components.
+Apply authorization policies to every private resource.
+
+Define a conflict policy for offline and multi-device edits:
+- Do not use furthest percentage as the only progress rule.
+- Use versioned updates and timestamps.
+- Preserve conflicting notes instead of silently deleting them.
+- Offer explicit merging of guest data after sign-in.
+
+8. PUBLIC DOWNLOADS AND KINDLE
+
+Launch formats:
+- EPUB for adjustable ebook reading.
+- PDF when an edition has an approved PDF.
+- Optional TXT or prepared HTML when actually supplied and approved.
+
+Only display download buttons for existing, published, authorized files.
+Do not generate formats during a public download request.
+
+Downloads must:
+- Use correct MIME types and safe Content-Disposition filenames.
+- Support Unicode titles with an ASCII filename fallback.
+- Stream files without loading them fully into PHP memory.
+- Handle HEAD and byte-range requests where needed, especially for PDF.
+- Enforce publication and rights checks.
+- Use reasonable abuse controls without obstructing ordinary visitors.
+- Avoid exposing private filesystem paths.
+
+Kindle launch support:
+- Offer EPUB downloads.
+- Provide a clear “Read on Kindle” help flow.
+- Link users to Amazon's official Send to Kindle page.
+- Explain that users download the file and submit it through Amazon.
+- Tell users to check language/layout compatibility on their device.
+
+Do not:
+- Ask for Amazon credentials.
+- Implement an invented Send to Kindle API.
+- Promise automatic delivery from a simple website button.
+- Promise website-to-Kindle reading-progress synchronization.
+- Treat EPUB acceptance by Send to Kindle as universal native USB support.
+- Require MOBI generation for launch.
+
+Keep automated email delivery and legacy device conversion out of launch scope.
+
+9. MOBILE, PWA, AND OFFLINE READING
+
+Build a responsive website first.
+Add progressive web app capabilities as the second milestone:
+- Web app manifest and suitable icons.
+- HTTPS service worker.
+- Installation guidance where supported.
+- Explicit “Save for offline reading” per eligible edition.
+- Download status, storage estimate, cancel, remove, and retry.
+- Offline bookshelf and clear offline/error states.
+- Locally saved progress that synchronizes after reconnection.
+
+Cache a book only after explicit user action.
+Respect reading/download rights when enabling offline access.
+Do not automatically download the whole catalog.
+
+Store offline book resources with Cache Storage and/or IndexedDB.
+Handle quota errors, eviction, partial downloads, and content updates.
+Mark a book available offline only after required resources are complete.
+
+Do not cache:
+- Administrative pages.
+- Authentication responses.
+- Private API responses in a shared cache.
+- Secrets or server credentials.
+
+Define account-specific local storage and logout cleanup behavior.
+State clearly that browsers may evict offline content.
+Do not promise identical installation or background-sync behavior on all devices.
+
+Retain normal reading and downloads when PWA features are unavailable.
+
+10. ADMINISTRATION AND INGESTION
+
+Implement administrator and editor roles.
+
+Provide:
+- Work, edition, contributor, collection, and category management.
+- Upload of EPUB, PDF, covers, and approved supplementary formats.
+- Metadata extraction with an editable preview.
+- Duplicate detection using file checksums.
+- CSV metadata import with validation and error reporting.
+- Draft, processing, review, published, and withdrawn states.
+- Rights/source/attribution fields.
+- File versioning and audit history.
+- A preview before publication.
+- A reversible unpublish action.
+- Broken-file and import-failure reporting.
+
+A failed or unreviewed import must not become publicly available.
+
+Process uploads through quarantine, validation, extraction, review,
+and publication.
+
+Apply:
+- File-size and MIME validation.
+- ZIP entry-count, expanded-size, and compression-ratio limits.
+- Path traversal and symlink protection.
+- Safe XML parsing with external entities disabled.
+- Resource limits for image processing and metadata extraction.
+- HTML/CSS sanitization for browser-rendered publication content.
+- Script, form, embedded executable content, and dangerous URL removal.
+- Blocking of unwanted remote resources and tracking requests.
+
+Never execute EPUB scripts.
+Use restrictive iframe sandboxing and Content Security Policy.
+Keep untrusted book content isolated from application credentials and DOM.
+Do not enable reader options that defeat this isolation.
+
+Prefer a credential-free content origin when deployment supports it.
+If using same-origin sanitized rendering, document and test the isolation model.
+
+OCR, Calibre conversion, and EPUBCheck may run locally or in CI.
+Do not make their binaries production dependencies.
+Use small, resumable background tasks within the hosting limits.
+
+11. RIGHTS AND PUBLICATION CONTROLS
+
+Support public-domain, openly licensed, and explicitly authorized editions.
+
+Track rights for translations and files separately from the underlying work.
+An original work's status must not automatically approve every translation.
+
+Require an administrator to record source and rights information before publishing.
+Provide attribution and a contact/reporting workflow.
+Do not scrape or populate the site with unverified books.
+
+Provide separate reading, downloading, and offline permissions.
+Describe these as access controls, not DRM.
+
+Do not promise revocation of files already downloaded or saved offline.
+If territory restrictions are needed, record this as a separate implementation
+requirement; a metadata field alone does not enforce geographic restrictions.
+
+Use original short demonstration books or properly licensed fixtures.
+
+12. SECURITY, ACCESSIBILITY, AND PERFORMANCE
+
+Security:
+- CSRF protection, output escaping, parameterized queries, and authorization.
+- Secure session cookies and session rotation.
+- Login and sensitive-endpoint rate limits.
+- Strong password hashing.
+- Administrator MFA using a maintained component where feasible.
+- Secrets only in environment configuration.
+- Production debug mode disabled.
+- No public setup scripts, database consoles, logs, backups, or .env files.
+- Dependency audit and actionable security logging.
+- No raw arbitrary URL imports; protect any future remote fetches against SSRF.
+
+Accessibility:
+- Target WCAG 2.2 AA for the website and reader controls.
+- Semantic markup, visible focus, keyboard access, and labeled controls.
+- Accessible dialogs and screen-reader announcements.
+- Sufficient contrast and usable touch targets.
+- Browser zoom and reduced motion.
+- Correct language and direction metadata.
+
+Distinguish application accessibility from source-publication accessibility.
+Do not claim scanned PDFs are accessible merely because the viewer is accessible.
+
+Performance:
+- Server-render catalog pages.
+- Lazy-load reader code only when opening a book.
+- Optimize covers and self-host fonts where licensing allows.
+- Paginate database queries and avoid N+1 queries.
+- Cache public metadata without leaking personalized content.
+- Use immutable versioned assets.
+- Measure representative large books and concurrent downloads.
+- Document results and hosting limits without inventing capacity guarantees.
+
+SEO:
+- Stable work and edition URLs.
+- Localized titles and descriptions.
+- Canonical URLs and appropriate hreflang relationships.
+- XML sitemaps and Book structured data.
+- Keep private, administrative, and reader-state URLs out of indexing.
+
+13. CPANEL DEPLOYMENT
+
+Deliver a specific Apache/cPanel deployment guide.
+
+Only Laravel's public directory may be web-accessible.
+Keep application code, vendor files, secrets, logs, and private storage outside it.
+
+If the domain document root cannot be changed:
+- Keep the application outside public_html.
+- Put only intended public assets and the front controller in public_html.
+- Adjust application paths safely.
+- Document the exact layout.
+
+Do not upload the whole project into public_html and rely solely on deny rules.
+
+Include:
+- Database and restricted database-user setup.
+- PHP extensions and upload-setting checks.
+- HTTPS setup.
+- .env configuration and application-key creation.
+- Migrations and initial administrator creation.
+- Safe filesystem permissions.
+- Apache rewrite rules.
+- Compiled production assets.
+- SMTP setup.
+- Cache and configuration optimization.
+- Health checks that reveal no secrets.
+
+Provide deployment paths:
+A. SSH/Composer available.
+B. Build locally or in CI and upload an artifact containing compatible
+   production dependencies and compiled assets.
+
+For the artifact path, still document how necessary one-time PHP commands
+will run through an available terminal or supported cron mechanism.
+If neither is available, identify the blocker rather than adding a public installer.
+
+Background jobs:
+- Use bounded cron-launched execution.
+- Prevent overlap.
+- Configure time limits, retry delays, maximum attempts, and failure reporting.
+- Ensure worker timeouts and retry settings cannot cause concurrent processing
+  of the same job.
+- Clean up incomplete imports and temporary files.
+- Respect the host's actual permitted cron interval.
+
+Include backup, restore, deployment rollback, and database-migration recovery
+instructions. Test restoring a backup in a separate environment.
+
+14. DELIVERY MILESTONES
+
+Milestone 0: Architecture and compatibility
+- Repository inspection.
+- Hosting compatibility checklist.
+- Dependency selection.
+- Data model and route plan.
+- EPUB reader proof with English, Russian, and Hebrew.
+- A written plan followed immediately by implementation.
+
+Milestone 1: Complete launchable library
+- Catalog and search.
+- Multilingual interface and linked editions.
+- Admin import/review/publication workflow.
+- EPUB and PDF readers.
+- Public downloads.
+- Guest progress and bookmarks.
+- Kindle help.
+- Accessibility and security fundamentals.
+- cPanel deployment package and instructions.
+
+Milestone 2: Reader convenience
+- Optional accounts and synchronization.
+- Private notes/highlights and reading lists.
+- Installable PWA and explicit offline book storage.
+- Data export/deletion and conflict handling.
+
+Milestone 3: Documented optional roadmap
+Do not implement these without a separate scope decision:
+- OPDS feeds for compatible third-party reading apps.
+- Parallel translation reading with editorial passage mappings.
+- Browser text-to-speech, subject to language/voice availability.
+- Audiobooks and synchronized narration.
+- Advanced full-library text search.
+- OCR and conversion pipelines.
+- Community corrections, reviews, or moderation.
+- Native mobile apps.
+- Object storage/CDN and external job processing.
+- Legacy Kindle conversions.
+
+Complete Milestones 0–2.
+Document Milestone 3 with benefits, dependencies, and tradeoffs.
+
+15. TESTING AND ACCEPTANCE
+
+Use meaningful automated tests and manual browser checks.
+
+Cover:
+- Anonymous browsing, reading, and downloads.
+- English, Russian, Hebrew, and mixed-direction content.
+- Multiple translations in the same language.
+- Unauthorized access to drafts and private user data.
+- Upload traversal, oversized archives, script injection, and malformed files.
+- Correct publication and withdrawal behavior.
+- EPUB position restoration after font or screen-size changes.
+- PDF navigation, search availability, and byte-range behavior.
+- Guest-to-account migration and sync conflicts.
+- Offline reading, interrupted downloads, quota failure, and logout cleanup.
+- Keyboard and screen-reader interaction.
+- Narrow mobile viewports and large text.
+- Failed jobs, retries, and deployment without a persistent worker.
+
+Use MySQL/MariaDB for integration tests covering database-specific behavior;
+do not rely only on SQLite.
+
+Test current Chromium, Firefox, and WebKit where available.
+Record any missing real-device checks for iOS, Android, and Kindle.
+Do not claim a simulator proves physical-device compatibility.
+
+16. REQUIRED DELIVERABLES
+
+Create:
+- Working application source.
+- Database migrations and safe demonstration seed data.
+- Automated tests.
+- Production asset build and reproducible dependency installation.
+- .env.example without secrets.
+- CLAUDE.md with stable project commands and architectural constraints.
+- README.md.
+- ARCHITECTURE.md.
+- DEPLOYMENT_CPANEL.md.
+- ADMIN_GUIDE.md.
+- CONTENT_IMPORT_GUIDE.md.
+- READER_COMPATIBILITY.md.
+- TEST_REPORT.md.
+- ROADMAP.md.
+
+Keep documentation consistent with actual implementation.
+
+At completion, report:
+- What works.
+- What was tested.
+- What could not be tested.
+- Remaining hosting or credential requirements.
+- Exact deployment steps.
+- Any material reader or format limitations.
+
+Begin by inspecting the repository and producing a short implementation plan.
+Then proceed with the work. Ask only about genuinely blocking decisions.
+Do not deploy to a live public domain without explicit authorization.
