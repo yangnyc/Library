@@ -30,38 +30,40 @@
             @endauth
         </header>
 
-        <dl class="facts card card-body">
+        <div class="card card-body my-4">
+<dl class="row mb-0">
             @if ($title !== $work->original_title)
-                <dt>{{ __('ui.work.original_title') }}</dt>
-                <dd><x-bdi :lang="$work->original_language_tag">{{ $work->original_title }}</x-bdi></dd>
+                <dt class="col-sm-4 col-lg-3">{{ __('ui.work.original_title') }}</dt>
+                <dd class="col-sm-8 col-lg-9"><x-bdi :lang="$work->original_language_tag">{{ $work->original_title }}</x-bdi></dd>
             @endif
-            <dt>{{ __('ui.work.original_language') }}</dt>
-            <dd><span lang="{{ $work->original_language_tag }}">{{ Language::nativeName($work->original_language_tag) }}</span></dd>
+            <dt class="col-sm-4 col-lg-3">{{ __('ui.work.original_language') }}</dt>
+            <dd class="col-sm-8 col-lg-9"><span lang="{{ $work->original_language_tag }}">{{ Language::nativeName($work->original_language_tag) }}</span></dd>
             @if ($work->first_published)
-                <dt>{{ __('ui.work.first_published') }}</dt>
-                <dd><bdi>{{ $work->first_published }}</bdi></dd>
+                <dt class="col-sm-4 col-lg-3">{{ __('ui.work.first_published') }}</dt>
+                <dd class="col-sm-8 col-lg-9"><bdi>{{ $work->first_published }}</bdi></dd>
             @endif
             @if ($work->series)
-                <dt>{{ __('ui.work.series') }}</dt>
-                <dd><bdi>{{ $work->series->localized('name') }}</bdi></dd>
+                <dt class="col-sm-4 col-lg-3">{{ __('ui.work.series') }}</dt>
+                <dd class="col-sm-8 col-lg-9"><bdi>{{ $work->series->localized('name') }}</bdi></dd>
             @endif
             @if ($work->categories->isNotEmpty())
-                <dt>{{ __('ui.work.categories') }}</dt>
-                <dd>
+                <dt class="col-sm-4 col-lg-3">{{ __('ui.work.categories') }}</dt>
+                <dd class="col-sm-8 col-lg-9">
                     @foreach ($work->categories as $category)
                         <a href="{{ route('categories.show', $category) }}"><bdi>{{ $category->localized('name') }}</bdi></a>@if(! $loop->last), @endif
                     @endforeach
                 </dd>
             @endif
             @if ($work->tags->isNotEmpty())
-                <dt>{{ __('ui.work.tags') }}</dt>
-                <dd>
+                <dt class="col-sm-4 col-lg-3">{{ __('ui.work.tags') }}</dt>
+                <dd class="col-sm-8 col-lg-9">
                     @foreach ($work->tags as $tag)
                         <a href="{{ route('catalog', ['q' => $tag->name]) }}"><bdi>{{ $tag->localized('name') }}</bdi></a>@if(! $loop->last), @endif
                     @endforeach
                 </dd>
             @endif
         </dl>
+</div>
 
         @if ($work->summary)
             <p class="prose" dir="auto">{{ $work->summary }}</p>

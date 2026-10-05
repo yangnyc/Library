@@ -10,7 +10,7 @@
     <p class="alert alert-warning" hidden data-offline-unsupported>{{ __('ui.offline.unsupported') }}</p>
     <p class="text-body-secondary small" role="status" data-offline-storage></p>
 
-    <ul class="shelf-list" data-offline-shelf></ul>
+    <ul class="list-group mb-4" data-offline-shelf></ul>
     <div class="card card-body text-center text-body-secondary py-5" hidden data-offline-empty>
         <p>{{ __('ui.offline.empty') }}</p>
         <a class="btn btn-primary" href="{{ route('catalog') }}">{{ __('ui.home.browse_catalog') }}</a>

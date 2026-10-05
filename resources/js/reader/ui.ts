@@ -165,7 +165,7 @@ export class ReaderUi {
                 }, () => this.editNote({ uuid: a.uuid, locator: a.locator, quote: a.quote }, a.note ?? ''));
                 if (a.conflictOf) {
                     const flag = document.createElement('p');
-                    flag.className = 'hint';
+                    flag.className = 'text-body-secondary small';
                     flag.textContent = this.t('conflictCopy');
                     item.prepend(flag);
                 }
@@ -260,7 +260,7 @@ export class ReaderUi {
                     action.run();
                     this.closeAll();
                 });
-                button.className = 'button button--small';
+                button.className = 'btn btn-sm btn-primary';
                 actions.append(button);
             }
         }

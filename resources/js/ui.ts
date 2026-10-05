@@ -26,7 +26,7 @@ if ($dialog.length) {
     const $accept = $dialog.find('[data-confirm-accept]');
     let pending: HTMLButtonElement | null = null;
 
-    $(document).on('click', 'button.button--danger', function (event) {
+    $(document).on('click', 'button.btn-danger', function (event) {
         const button = this as HTMLButtonElement;
         if (!button.form || button.type !== 'submit' || !button.form.checkValidity()) return;
         event.preventDefault();

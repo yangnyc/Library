@@ -2,12 +2,12 @@
 @section('admin-title', 'Dashboard')
 
 @section('admin')
-    <ul class="stat-row">
+    <ul class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3 list-unstyled">
         @foreach (\App\Modules\Catalog\Models\Edition::STATUSES as $status)
-            <li><strong>{{ $counts[$status] ?? 0 }}</strong> <a href="{{ route('admin.editions.index', ['status' => $status]) }}">{{ $status }}</a></li>
+            <li class="col"><div class="card card-body h-100"><strong class="fs-2 lh-1">{{ $counts[$status] ?? 0 }}</strong> <span class="text-body-secondary"><a href="{{ route('admin.editions.index', ['status' => $status]) }}">{{ $status }}</a></span></div></li>
         @endforeach
-        <li><strong>{{ $openReports }}</strong> <a href="{{ route('admin.reports.index') }}">open reports</a></li>
-        <li><strong>{{ $failedQueueJobs }}</strong> failed queue jobs</li>
+        <li class="col"><div class="card card-body h-100"><strong class="fs-2 lh-1">{{ $openReports }}</strong> <span class="text-body-secondary"><a href="{{ route('admin.reports.index') }}">open reports</a></span></div></li>
+        <li class="col"><div class="card card-body h-100"><strong class="fs-2 lh-1">{{ $failedQueueJobs }}</strong> <span class="text-body-secondary">failed queue jobs</span></div></li>
     </ul>
 
     @if ($failedQueueJobs > 0)

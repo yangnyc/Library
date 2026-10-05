@@ -10,7 +10,7 @@ const unsupported = document.querySelector<HTMLElement>('[data-offline-unsupport
 function button(text: string, onClick: () => void, ghost = true): HTMLButtonElement {
     const el = document.createElement('button');
     el.type = 'button';
-    el.className = 'button button--small' + (ghost ? ' button--ghost' : '');
+    el.className = 'btn btn-sm ' + (ghost ? 'btn-outline-secondary' : 'btn-primary');
     el.textContent = text;
     el.addEventListener('click', onClick);
     return el;
@@ -26,7 +26,9 @@ async function showStorage(): Promise<void> {
 
 async function row(record: OfflineRecord): Promise<HTMLLIElement> {
     const li = document.createElement('li');
+    li.className = 'list-group-item';
     const title = document.createElement('h2');
+    title.className = 'h5';
     const bdi = document.createElement('bdi');
     bdi.lang = record.language;
     bdi.dir = record.direction === 'rtl' ? 'rtl' : record.direction === 'ltr' ? 'ltr' : 'auto';
@@ -34,14 +36,14 @@ async function row(record: OfflineRecord): Promise<HTMLLIElement> {
     title.append(bdi);
 
     const status = document.createElement('p');
-    status.className = 'hint';
+    status.className = 'text-body-secondary small';
     const actions = document.createElement('div');
-    actions.className = 'shelf-list__row';
+    actions.className = 'd-flex flex-wrap align-items-center gap-2';
     li.append(title, status, actions);
 
     const available = await isAvailableOffline(record);
     const openLink = document.createElement('a');
-    openLink.className = 'button button--small';
+    openLink.className = 'btn btn-sm btn-primary';
     openLink.href = `${strings.readUrl}/${encodeURIComponent(record.editionSlug)}/${record.format}`;
     openLink.textContent = strings.open;
 

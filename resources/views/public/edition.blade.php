@@ -152,40 +152,41 @@
                 </div>
             @endif
 
-            <dl class="facts card card-body">
-                <dt>{{ __('ui.edition.language') }}</dt>
-                <dd><span lang="{{ $edition->language_tag }}">{{ Language::nativeName($edition->language_tag) }}</span></dd>
+            <div class="card card-body my-4">
+<dl class="row mb-0">
+                <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.language') }}</dt>
+                <dd class="col-sm-8 col-lg-9"><span lang="{{ $edition->language_tag }}">{{ Language::nativeName($edition->language_tag) }}</span></dd>
                 @if ($translators->isNotEmpty())
-                    <dt>{{ __('ui.edition.translators') }}</dt>
-                    <dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.translators') }}</dt>
+                    <dd class="col-sm-8 col-lg-9">
                         @foreach ($translators as $person)
                             <a href="{{ route('contributors.show', $person) }}"><x-bdi :lang="$person->localizedLanguage('name')">{{ $person->localized('name') }}</x-bdi></a>@if(! $loop->last), @endif
                         @endforeach
                     </dd>
                 @endif
                 @if ($editors->isNotEmpty())
-                    <dt>{{ __('ui.edition.editors') }}</dt>
-                    <dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.editors') }}</dt>
+                    <dd class="col-sm-8 col-lg-9">
                         @foreach ($editors as $person)
                             <a href="{{ route('contributors.show', $person) }}"><x-bdi :lang="$person->localizedLanguage('name')">{{ $person->localized('name') }}</x-bdi></a>@if(! $loop->last), @endif
                         @endforeach
                     </dd>
                 @endif
                 @if ($edition->publisher)
-                    <dt>{{ __('ui.edition.publisher') }}</dt><dd><bdi>{{ $edition->publisher }}</bdi></dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.publisher') }}</dt><dd class="col-sm-8 col-lg-9"><bdi>{{ $edition->publisher }}</bdi></dd>
                 @endif
                 @if ($edition->published_date)
-                    <dt>{{ __('ui.edition.published') }}</dt><dd><bdi>{{ $edition->published_date }}</bdi></dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.published') }}</dt><dd class="col-sm-8 col-lg-9"><bdi>{{ $edition->published_date }}</bdi></dd>
                 @endif
                 @if ($edition->edition_statement)
-                    <dt>{{ __('ui.edition.edition_statement') }}</dt><dd><bdi>{{ $edition->edition_statement }}</bdi></dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.edition_statement') }}</dt><dd class="col-sm-8 col-lg-9"><bdi>{{ $edition->edition_statement }}</bdi></dd>
                 @endif
                 @if ($edition->isbn)
-                    <dt>{{ __('ui.edition.isbn') }}</dt><dd><bdi dir="ltr">{{ $edition->isbn }}</bdi></dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.isbn') }}</dt><dd class="col-sm-8 col-lg-9"><bdi dir="ltr">{{ $edition->isbn }}</bdi></dd>
                 @endif
                 @if ($edition->source_name || $edition->source_url)
-                    <dt>{{ __('ui.edition.source') }}</dt>
-                    <dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.source') }}</dt>
+                    <dd class="col-sm-8 col-lg-9">
                         @if ($edition->source_url)
                             <a href="{{ $edition->source_url }}" rel="noopener noreferrer external"><bdi>{{ $edition->source_name ?: $edition->source_url }}</bdi></a>
                         @else
@@ -193,14 +194,14 @@
                         @endif
                     </dd>
                 @endif
-                <dt>{{ __('ui.edition.rights') }}</dt>
-                <dd>
+                <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.rights') }}</dt>
+                <dd class="col-sm-8 col-lg-9">
                     {{ __('ui.edition.rights_'.$edition->rights_status) }}
                     @if ($edition->rights_holder) — <bdi>{{ $edition->rights_holder }}</bdi>@endif
                 </dd>
                 @if ($edition->license_name)
-                    <dt>{{ __('ui.edition.license') }}</dt>
-                    <dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.license') }}</dt>
+                    <dd class="col-sm-8 col-lg-9">
                         @if ($edition->license_url)
                             <a href="{{ $edition->license_url }}" rel="license noopener noreferrer external"><bdi>{{ $edition->license_name }}</bdi></a>
                         @else
@@ -209,12 +210,13 @@
                     </dd>
                 @endif
                 @if ($edition->attribution)
-                    <dt>{{ __('ui.edition.attribution') }}</dt><dd dir="auto">{{ $edition->attribution }}</dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.attribution') }}</dt><dd class="col-sm-8 col-lg-9" dir="auto">{{ $edition->attribution }}</dd>
                 @endif
                 @if ($edition->territory_notes)
-                    <dt>{{ __('ui.edition.territory') }}</dt><dd dir="auto">{{ $edition->territory_notes }}</dd>
+                    <dt class="col-sm-4 col-lg-3">{{ __('ui.edition.territory') }}</dt><dd class="col-sm-8 col-lg-9" dir="auto">{{ $edition->territory_notes }}</dd>
                 @endif
             </dl>
+</div>
 
             @unless ($preview)
                 <p><a href="{{ route('rights', ['edition' => $edition->slug]) }}">{{ __('ui.edition.report') }}</a></p>
