@@ -7,10 +7,12 @@
             <p class="eyebrow">{{ config('library.name') }}</p>
             <h1>{{ __('ui.home.title') }}</h1>
             <p class="lead">{{ __('ui.home.intro') }}</p>
-            <form class="search-form input-group input-group-lg" action="{{ route('catalog') }}" method="get" role="search">
+            <form class="search-form" action="{{ route('catalog') }}" method="get" role="search">
                 <label for="home-q" class="visually-hidden">{{ __('ui.home.search_label') }}</label>
+                <div class="input-group input-group-lg">
                 <input class="form-control" id="home-q" type="search" name="q" placeholder="{{ __('ui.home.search_placeholder') }}" dir="auto" autocomplete="off">
                 <button type="submit" class="btn btn-primary">{{ __('ui.home.search') }}</button>
+                </div>
                 <div class="search-suggest" data-search-suggest data-url="{{ route('catalog.suggest') }}" data-label="{{ __('ui.home.suggestions') }}" data-all="{{ __('ui.home.all_results') }}"></div>
             </form>
             <p class="hero__links">

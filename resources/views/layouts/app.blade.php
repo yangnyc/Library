@@ -51,12 +51,14 @@
             </a>
 
             @if ($routeName !== 'home')
-                <form class="header-search input-group" action="{{ route('catalog') }}" method="get" role="search">
+                <form class="header-search" action="{{ route('catalog') }}" method="get" role="search">
                     <label for="header-q" class="visually-hidden">{{ __('ui.home.search_label') }}</label>
+                    <div class="input-group">
                     <input class="form-control" id="header-q" name="q" type="search" maxlength="200" placeholder="{{ __('ui.home.search_placeholder') }}" dir="auto" autocomplete="off">
                     <button type="submit" class="btn btn-outline-secondary" aria-label="{{ __('ui.home.search') }}">
                         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m15 15 5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
                     </button>
+                    </div>
                     <div class="search-suggest" data-search-suggest data-url="{{ route('catalog.suggest') }}" data-label="{{ __('ui.home.suggestions') }}" data-all="{{ __('ui.home.all_results') }}"></div>
                 </form>
             @else

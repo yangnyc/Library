@@ -24,7 +24,7 @@ const app = config();
 // Keep the catalog's full filter form available without JavaScript.
 const filterPanel = document.querySelector<HTMLDetailsElement>('[data-catalog-filters]');
 if (filterPanel) {
-    const narrow = window.matchMedia('(max-width: 46rem)');
+    const narrow = window.matchMedia('(max-width: 767.98px)');
     filterPanel.open = !narrow.matches;
     narrow.addEventListener('change', (event) => {
         filterPanel.open = !event.matches;
